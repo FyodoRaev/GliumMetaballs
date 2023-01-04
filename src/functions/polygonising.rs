@@ -2,15 +2,20 @@ use crate::functions::linspace;
 use super::linspace::Linspace;
 #[derive(Copy, Clone)]
 pub struct Vertex {
-    position: (f32, f32, f32)
+    position: (f64, f64, f64)
 }
 
 implement_vertex!(Vertex, position);
 
 
 // I will loop this function and get new and new vertices for polygons
-pub fn polygoniseScalarField(linspace: Linspace, metaBallsCenters: Vec<(f32, f32, f32)>, metaBallsRads: Vec<f32>) -> Vec<(Vertex, i32)> {
+pub fn polygoniseScalarField(linspace: Linspace, metaBallsCenters: Vec<(f64, f64, f64)>, metaBallsRads: Vec<f64>) -> Vec<(Vertex, i32)> {
   // Start marching cubes
-  let triangles = linspace.getVerticesCoordsIndexes(metaBallsCenters, metaBallsRads, 40.0);
-  return triangles;
+  let pointCoordinates = linspace.getVerticesCoordsIndexes(metaBallsCenters, metaBallsRads, 40.0);
+  let mut verticesIndexes: Vec<(Vertex, i32)> = Vec::new();
+  for point in pointCoordinates {
+
+    verticesIndexes.push((Vertex {position: point.0,}, point.1));
+  }
+  return verticesIndexes;
 }

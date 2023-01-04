@@ -1,38 +1,39 @@
 use crate::functions::marching_cubes;
+use crate::functions::floatIterator::FloatIterator;
 
-const triTable: Vec<Vec<usize>> = marching_cubes::tri_table();
-const cornerIndexAFromEdge: [i32; 12] = marching_cubes::cornerIndexAFromEdge();
-const cornerIndexBFromEdge: [i32; 12] = marching_cubes::cornerIndexBFromEdge();
+static triTable: &[&[usize]] = marching_cubes::TABLE;
+static cornerIndexAFromEdge: &[usize] = marching_cubes::cornerIndexAFromEdge;
+static cornerIndexBFromEdge: &[usize] = marching_cubes::cornerIndexBFromEdge;
 
 pub struct Linspace {
-    points: Vec<(f32, f32, f32)>,
-    step: f32,
-    len: i32,
-    cubes: Vec<[(f32, f32, f32); 8]>,
+    points: Vec<(f64, f64, f64)>,
+    step: f64,
+    len: f64,
+    cubes: Vec<[(f64, f64, f64); 8]>,
 }
 
 impl Linspace {
-    pub fn new(step: f32, len: i32) -> Linspace {
-        let mut points;
+    pub fn new(step: f64, len: f64) -> Linspace {
+        let mut points: Vec<(f64, f64, f64)> = Vec::new();
 
         //Creating all points
-        for i in (0..len).step_by(step) {
-            for j in (0..len).step_by(step) {
-                for l in (0..len).step_by(step) {
-                    points.push_back((i, j, l));
+        for i in FloatIterator::new_with_step(0.0, len, step) {
+            for j in FloatIterator::new_with_step(0.0, len, step) {
+                for l in FloatIterator::new_with_step(0.0, len, step) {
+                    points.push((i, j, l));
                 }
             }
         }
 
         //creating cubes
-        let mut cubes: Vec<[(f32, f32, f32); 8]>;
-        for i in (0..len).step_by(step) {
-            let x: f32 = i;
-            for j in (0..len).step_by(step) {
-                let y: f32 = j;
-                for l in (0..len).step_by(step) {
-                    let z: f32 = l;
-                    let mut cube = [
+        let mut cubes: Vec<[(f64, f64, f64); 8]> = Vec::new();
+        for i in FloatIterator::new_with_step(0.0, len, step) {
+            let x: f64 = i;
+            for j in FloatIterator::new_with_step(0.0, len, step) {
+                let y: f64 = j;
+                for l in FloatIterator::new_with_step(0.0, len, step) {
+                    let z: f64 = l;
+                    let cube = [
                         (x, y, z),
                         (x + step, y, z),
                         (x + step, y, z + step),
@@ -42,7 +43,7 @@ impl Linspace {
                         (x + step, y + step, z + step),
                         (x, y + step, z + step),
                     ];
-                    cubes.push_back(cube);
+                    cubes.push(cube);
                 }
             }
         }
@@ -56,13 +57,14 @@ impl Linspace {
 }
 
 impl Linspace {
-    pub fn getVerticesCoordsIndexes(circleCenters: Vec<(f32, f32, f32)>, circleRads: Vec<f32>,threshold: f32) -> Vec<((f32, f32, f32), i32)> {
-        let mut vertexPositions: Vec<((f32, f32, f32), i32)>;
+    pub fn getVerticesCoordsIndexes(&self, circleCenters: Vec<(f64, f64, f64)>, circleRads: Vec<f64>,threshold: f64) -> Vec<((f64, f64, f64), i32)> {
+        let mut vertexPositions: Vec<((f64, f64, f64), i32)> = Vec::new();
         let mut index = 1;
-        for cube in Linspace::cubes {
+        let cubes = &self.cubes;
+        for cube in cubes {
             let mut cubeIndex = 0;
-            for i in (0..8) {
-                let value = metaball(cube[i], circleCenters, circleRads);
+            for i in 0..8 {
+                let value = metaball(cube[i], &circleCenters, &circleRads);
                 if value < threshold {
                     cubeIndex = 1 << i;
                 }
@@ -70,12 +72,15 @@ impl Linspace {
             let triangulation = triTable[cubeIndex];
             for edgeIndex in triangulation {
                 // Ищу координаты ребер формирующих ребро, которое должно быть закрашено согласно триангуляции
-                let indexA = cornerIndexAFromEdge[edgeIndex];
-                let indexB = cornerIndexBFromEdge[edgeIndex];
+                let indexA = cornerIndexAFromEdge[*edgeIndex];
+                let indexB = cornerIndexBFromEdge[*edgeIndex];
 
                 // точка на ребре которая должна быть включена в треугольник который нужно закрасить
-                let vertexPos: (f32, f32, f32) = (cube[indexA] + cube[indexB]) / 2;
-                vertexPositions.push_back((vertexPos, index));
+                let mean_x = cube[indexA].0 + cube[indexB].0;
+                let mean_y = cube[indexA].1 + cube[indexB].1;
+                let mean_z = cube[indexA].2 + cube[indexB].2;
+                let vertexPos: (f64, f64, f64) = (mean_x, mean_y, mean_z);
+                vertexPositions.push((vertexPos, index));
                 index +=1; // I have to store indexes of vertices
             }
         }
@@ -83,13 +88,13 @@ impl Linspace {
     }
 }
 
-pub fn metaball(point: (f32, f32, f32), circleCenters: Vec<(f32, f32, f32)>, circleRads: Vec<f32>,) -> f32 {
-    let mut meteballFunc: f32;
+pub fn metaball(point: (f64, f64, f64), circleCenters: &Vec<(f64, f64, f64)>, circleRads: &Vec<f64>,) -> f64 {
+    let mut meteballFunc: f64 = 0.0;
     for i in 0..circleCenters.len() {
-        meteballFunc += 1
-            / (f32::powf(point.1 - circleCenters[i].1, 2.0)
-                + f32::powf(point.2 - circleCenters[i].2, 2.0)
-                + f32::powf(point.3 - circleCenters[i].3, 2.0));
+        meteballFunc += f64::powf(circleRads[i],2.0)
+            / (f64::powf(point.0 - circleCenters[i].0, 2.0)
+                + f64::powf(point.1 - circleCenters[i].1, 2.0)
+                + f64::powf(point.2 - circleCenters[i].2, 2.0));
     }
     return meteballFunc;
 }
