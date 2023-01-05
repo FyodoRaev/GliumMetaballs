@@ -18,9 +18,9 @@ impl Linspace {
         let mut points: Vec<(f64, f64, f64)> = Vec::new();
 
         //Creating all points
-        for i in FloatIterator::new_with_step(0.0, len, step) {
-            for j in FloatIterator::new_with_step(0.0, len, step) {
-                for l in FloatIterator::new_with_step(0.0, len, step) {
+        for i in FloatIterator::new_with_step(-len/2.0, len/2.0, step) {
+            for j in FloatIterator::new_with_step(-len/2.0, len/2.0, step) {
+                for l in FloatIterator::new_with_step(-len/2.0, len/2.0, step) {
                     points.push((i, j, l));
                 }
             }
@@ -28,11 +28,11 @@ impl Linspace {
 
         //creating cubes
         let mut cubes: Vec<[(f64, f64, f64); 8]> = Vec::new();
-        for i in FloatIterator::new_with_step(0.0, len, step) {
+        for i in FloatIterator::new_with_step(-len/2.0, len/2.0, step) {
             let x: f64 = i;
-            for j in FloatIterator::new_with_step(0.0, len, step) {
+            for j in FloatIterator::new_with_step(-len/2.0, len/2.0, step) {
                 let y: f64 = j;
-                for l in FloatIterator::new_with_step(0.0, len, step) {
+                for l in FloatIterator::new_with_step(-len/2.0, len/2.0, step) {
                     let z: f64 = l;
                     let cube = [
                         (x, y, z),
@@ -66,7 +66,7 @@ impl Linspace {
             let mut cubeIndex = 0;
             for i in 0..8 {
                 let value = metaball(cube[i], &circleCenters, &circleRads);
-                if value < threshold {
+                if value > threshold {
                     cubeIndex = 1 << i;
                 }
             }

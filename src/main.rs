@@ -5,9 +5,9 @@ extern crate glium;
 mod cube;
 mod functions;
 fn main() {
-    let linspace = Linspace::new(1.0, 50.0);
-    let mut metaBallsCenters = vec![(25.0,20.0,20.0), (20.0, 10.0, 10.0)];
-    let metaBallsRads = vec![16.0, 16.0];
+    let linspace = Linspace::new(0.5, 50.0);
+    let mut metaBallsCenters = vec![(-5.0,-5.0,-5.0), (5.0, 5.0, 5.0)];
+    let metaBallsRads = vec![10.0, 7.0];
     let testVertices = polygoniseScalarField(&linspace, &metaBallsCenters, &metaBallsRads);
     #[allow(unused_imports)]
     use glium::{glutin, Surface};
