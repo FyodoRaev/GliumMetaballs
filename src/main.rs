@@ -6,7 +6,7 @@ mod cube;
 mod functions;
 fn main() {
     let linspace = Linspace::new(0.5, 50.0);
-    let mut metaBallsCenters = vec![(-5.0,-5.0,-5.0), (5.0, 5.0, 5.0)];
+    let mut metaBallsCenters = vec![(-15.0,5.0,-5.0), (5.0, 5.0, 5.0)];
     let metaBallsRads = vec![10.0, 7.0];
     let testVertices = polygoniseScalarField(&linspace, &metaBallsCenters, &metaBallsRads);
     #[allow(unused_imports)]
