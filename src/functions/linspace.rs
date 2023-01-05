@@ -7,7 +7,6 @@ static cornerIndexBFromEdge: &[usize] = marching_cubes::cornerIndexBFromEdge;
 
 
 pub struct Linspace {
-    points: Vec<(f64, f64, f64)>,
     step: f64,
     len: f64,
     cubes: Vec<[(f64, f64, f64); 8]>,
@@ -15,17 +14,6 @@ pub struct Linspace {
 
 impl Linspace {
     pub fn new(step: f64, len: f64) -> Linspace {
-        let mut points: Vec<(f64, f64, f64)> = Vec::new();
-
-        //Creating all points
-        for i in FloatIterator::new_with_step(-len/2.0, len/2.0, step) {
-            for j in FloatIterator::new_with_step(-len/2.0, len/2.0, step) {
-                for l in FloatIterator::new_with_step(-len/2.0, len/2.0, step) {
-                    points.push((i, j, l));
-                }
-            }
-        }
-
         //creating cubes
         let mut cubes: Vec<[(f64, f64, f64); 8]> = Vec::new();
         for i in FloatIterator::new_with_step(-len/2.0, len/2.0, step) {
@@ -49,7 +37,6 @@ impl Linspace {
             }
         }
         return Linspace {
-            points,
             step,
             len,
             cubes,
@@ -63,14 +50,9 @@ impl Linspace {
         let mut index = 1;
         let cubes = &self.cubes;
         for cube in cubes {
-            let mut cubeIndex = 0;
-            for i in 0..8 {
-                let value = metaball(cube[i], &circleCenters, &circleRads);
-                if value > threshold {
-                    cubeIndex = 1 << i;
-                }
-            }
-            let triangulation = triTable[cubeIndex];
+            let mut cubeIndex = 162;
+            
+            let triangulation = triTable[cubeIndex]; // 15 type of triangulation
             for edgeIndex in triangulation {
                 // Ищу координаты ребер формирующих ребро, которое должно быть закрашено согласно триангуляции
                 let indexA = cornerIndexAFromEdge[*edgeIndex];
@@ -81,8 +63,8 @@ impl Linspace {
                 let mean_y = cube[indexA].1 + cube[indexB].1;
                 let mean_z = cube[indexA].2 + cube[indexB].2;
                 let vertexPos: (f64, f64, f64) = (mean_x, mean_y, mean_z);
-                vertexPositions.push((vertexPos, index));
-                index +=1; // I have to store indexes of vertices
+                vertexPositions.push((vertexPos, index)); // I have to store indexes of vertices
+                index+=1; 
             }
         }
         return vertexPositions;
