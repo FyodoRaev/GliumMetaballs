@@ -5,6 +5,7 @@ static triTable: &[&[usize]] = marching_cubes::TABLE;
 static cornerIndexAFromEdge: &[usize] = marching_cubes::cornerIndexAFromEdge;
 static cornerIndexBFromEdge: &[usize] = marching_cubes::cornerIndexBFromEdge;
 
+
 pub struct Linspace {
     points: Vec<(f64, f64, f64)>,
     step: f64,
@@ -57,7 +58,7 @@ impl Linspace {
 }
 
 impl Linspace {
-    pub fn getVerticesCoordsIndexes(&self, circleCenters: Vec<(f64, f64, f64)>, circleRads: Vec<f64>,threshold: f64) -> Vec<((f64, f64, f64), i32)> {
+    pub fn getVerticesCoordsIndexes(&self, circleCenters: &Vec<(f64, f64, f64)>, circleRads: &Vec<f64>,threshold: f64) -> Vec<((f64, f64, f64), i32)> {
         let mut vertexPositions: Vec<((f64, f64, f64), i32)> = Vec::new();
         let mut index = 1;
         let cubes = &self.cubes;
