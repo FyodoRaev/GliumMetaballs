@@ -11,7 +11,7 @@ implement_vertex!(Vertex, position);
 // I will loop this function and get new and new vertices for polygons
 pub fn polygoniseScalarField(linspace: &Linspace, metaBallsCenters: &Vec<(f64, f64, f64)>, metaBallsRads: &Vec<f64>) -> Vec<(Vertex, i32)> {
   // Start marching cubes
-  let pointCoordinates = linspace.getVerticesCoordsIndexes(metaBallsCenters, metaBallsRads, 2.0);
+  let pointCoordinates = linspace.getVerticesCoordsIndexes(metaBallsCenters, metaBallsRads, 1.0);
   let mut verticesIndexes: Vec<(Vertex, i32)> = Vec::new();
   for point in pointCoordinates {
 
