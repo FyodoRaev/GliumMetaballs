@@ -5,7 +5,7 @@ extern crate glium;
 mod cube;
 mod functions;
 fn main() {
-    let linspace = Linspace::new(0.5, 50.0);
+    let linspace = Linspace::new(4.5, 10.0);
     let mut metaBallsCenters = vec![(-15.0,5.0,-5.0), (5.0, 5.0, 5.0)];
     let metaBallsRads = vec![10.0, 7.0];
     let testVertices = polygoniseScalarField(&linspace, &metaBallsCenters, &metaBallsRads);
@@ -19,14 +19,11 @@ fn main() {
 
 
     let mut shape: Vec<Vertex> = Vec::new();
-    let mut list_of_indices: Vec<u32> = Vec::new();
     for vertex in testVertices {
         shape.push(vertex.0);
-        list_of_indices.push(vertex.1 as u32);
     }
     let positions = glium::VertexBuffer::new(&display, &shape).unwrap();
-    let indices = glium::IndexBuffer::new(&display, glium::index::PrimitiveType::TrianglesList,
-        &list_of_indices).unwrap();
+    let indices = glium::index::NoIndices(glium::index::PrimitiveType::TrianglesList);
 
     let vertex_shader_src = r#"
         #version 140

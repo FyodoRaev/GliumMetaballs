@@ -63,13 +63,13 @@ impl Linspace {
         let mut index = 1;
         let cubes = &self.cubes;
         for cube in cubes {
-            let mut cubeIndex = 0;
-            for i in 0..8 {
+            let mut cubeIndex = 3;
+            /*for i in 0..8 {
                 let value = metaball(cube[i], &circleCenters, &circleRads);
                 if value > threshold {
                     cubeIndex = 1 << i;
                 }
-            }
+            }*/
             let triangulation = triTable[cubeIndex];
             for edgeIndex in triangulation {
                 // Ищу координаты ребер формирующих ребро, которое должно быть закрашено согласно триангуляции
@@ -77,9 +77,9 @@ impl Linspace {
                 let indexB = cornerIndexBFromEdge[*edgeIndex];
 
                 // точка на ребре которая должна быть включена в треугольник который нужно закрасить
-                let mean_x = cube[indexA].0 + cube[indexB].0;
-                let mean_y = cube[indexA].1 + cube[indexB].1;
-                let mean_z = cube[indexA].2 + cube[indexB].2;
+                let mean_x = (cube[indexA].0 + cube[indexB].0)/2.0;
+                let mean_y = (cube[indexA].1 + cube[indexB].1)/2.0;
+                let mean_z = (cube[indexA].2 + cube[indexB].2)/2.0;
                 let vertexPos: (f64, f64, f64) = (mean_x, mean_y, mean_z);
                 vertexPositions.push((vertexPos, index));
                 index +=1; // I have to store indexes of vertices
