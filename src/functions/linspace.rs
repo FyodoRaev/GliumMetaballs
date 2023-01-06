@@ -10,7 +10,7 @@ pub struct Linspace {
     points: Vec<(f64, f64, f64)>,
     step: f64,
     len: f64,
-    cubes: Vec<[(f64, f64, f64); 8]>,
+pub cubes: Vec<[(f64, f64, f64); 8]>,
 }
 
 impl Linspace {
@@ -77,9 +77,9 @@ impl Linspace {
                 let indexB = cornerIndexBFromEdge[*edgeIndex];
 
                 // точка на ребре которая должна быть включена в треугольник который нужно закрасить
-                let mean_x = cube[indexA].0 + cube[indexB].0;
-                let mean_y = cube[indexA].1 + cube[indexB].1;
-                let mean_z = cube[indexA].2 + cube[indexB].2;
+                let mean_x = (cube[indexA].0 + cube[indexB].0)/2.0;
+                let mean_y = (cube[indexA].1 + cube[indexB].1)/2.0;
+                let mean_z = (cube[indexA].2 + cube[indexB].2)/2.0;
                 let vertexPos: (f64, f64, f64) = (mean_x, mean_y, mean_z);
                 vertexPositions.push((vertexPos, index));
                 index +=1; // I have to store indexes of vertices
