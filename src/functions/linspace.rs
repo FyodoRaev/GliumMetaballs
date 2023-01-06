@@ -50,9 +50,9 @@ impl Linspace {
         let mut index = 1;
         let cubes = &self.cubes;
         for cube in cubes {
-            let mut cubeIndex = 162;
+            let mut cubeIndex = 3;
             
-            let triangulation = triTable[cubeIndex]; // 15 type of triangulation
+            let triangulation = &[1, 8, 3, 9, 8, 1]; // 15 type of triangulation
             for edgeIndex in triangulation {
                 // Ищу координаты ребер формирующих ребро, которое должно быть закрашено согласно триангуляции
                 let indexA = cornerIndexAFromEdge[*edgeIndex];
