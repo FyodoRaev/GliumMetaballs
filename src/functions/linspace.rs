@@ -65,9 +65,10 @@ impl Linspace {
         for cube in cubes {
             let mut cubeIndex = 0;
             for i in 0..8 {
+                let power = i as u32;
                 let value = metaball(cube[i], &circleCenters, &circleRads);
                 if value > threshold {
-                    cubeIndex = 1 << i;
+                    cubeIndex += u32::pow(2, power) as usize;
                 }
             }
             let triangulation = triTable[cubeIndex];
