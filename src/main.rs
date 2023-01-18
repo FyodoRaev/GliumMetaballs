@@ -9,12 +9,12 @@ mod cube;
 mod functions;
 fn main() {
     let limit = 25.0;
-    let linspace = Linspace::new(1.0, limit);
+    let linspace = Linspace::new(0.3, limit);
     let mut metaBallsCenters = vec![(-1.0, 2.0, -1.0), (1.0, 2.0, 1.0)];
     let metaBallsRads = vec![2.0, 3.0];
 
-    let mut stmetaball_vel = (0.7, 0.60, 0.4);
-    let mut ndmetaball_vel = (0.5, 0.70, 0.4);
+    let mut stmetaball_vel = (0.3, 0.5, 0.4);
+    let mut ndmetaball_vel = (0.5, 0.7, 0.6);
 
     #[allow(unused_imports)]
     use glium::{glutin, Surface};
