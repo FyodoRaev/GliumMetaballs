@@ -52,13 +52,11 @@ impl Linspace {
         for cube in cubes {
             let mut cubeIndex = 0;
             for i in 0..8 {
+                let power = i as u32;
                 if cube[i].2 == 0.0 {
-                    cubeIndex +=1;
+                    cubeIndex += u32::pow(2, power) as usize;
                 }
             }
-        if cubeIndex == 4 {
-            cubeIndex = 51;
-        }
         println!("{}", cubeIndex);
         let triangulation = triTable[cubeIndex]; 
         for edgeIndex in triangulation {
