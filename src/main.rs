@@ -25,29 +25,35 @@ fn main() {
     let display = glium::Display::new(wb, cb, &event_loop).unwrap();
 
     let vertex_shader_src = r#"
-        #version 150
+    #version 300 es
 
-        in vec3 position;
-        in vec3 normal;
-
-        out vec3 v_normal;
-
-        uniform mat4 matrix;
-        void main() {
-            v_normal = transpose(inverse(mat3(matrix))) * normal;  
-            gl_Position =   matrix * vec4(position, 1.0);
-        }
+    precision highp float;
+    precision highp int;
+    
+    uniform mat4 MVMatrix;  //Model View Matrix (no change)
+    in vec3 position;
+    out vec3 vPos;
+    void main()
+    {
+          gl_Position= MVMatrix * vec4(position.xyz,1.0);
+          vPos = (MVMatrix * vec4(position.xyz,1.0)).xyz;
+    }
     "#;
 
     let fragment_shader_src = r#"
-        #version 140
+        #version 300 es
+        precision highp float;
+        precision highp int;
 
-        in vec3 v_normal;
+        in vec3 vPos;
         out vec4 color;
         uniform vec3 u_light;
 
         void main() {
-            float brightness = dot(normalize(v_normal), normalize(u_light));
+            vec3 fdx = vec3(dFdx(vPos.x),dFdx(vPos.y),dFdx(vPos.z));    
+            vec3 fdy = vec3(dFdy(vPos.x),dFdy(vPos.y),dFdy(vPos.z));
+            vec3 normal = normalize(cross(fdx,fdy));
+            float brightness = dot(normalize(normal), normalize(u_light));
             vec3 dark_color = vec3(0.6, 0.0, 0.0);
             vec3 regular_color = vec3(1.0, 0.0, 0.0);
             color = vec4(mix(dark_color, regular_color, brightness), 1.0);
@@ -122,18 +128,11 @@ fn main() {
         let mut shape: Vec<Vertex> = polygoniseScalarField(&linspace, &metaBallsCenters, &metaBallsRads);
         let positions = glium::VertexBuffer::new(&display, &shape).unwrap();
         let indices = glium::index::NoIndices(glium::index::PrimitiveType::TrianglesList);
-        let mut norms = Vec::new();
-        for _ in 0..positions.len() {
-            norms.push(Normal {
-                normal: (0.614804, 0.493997, 0.614804),
-            });
-        }
-        let normals = glium::VertexBuffer::new(&display, &norms).unwrap();
         target.draw(
-                (&positions, &normals),
-                &indices,
-                &program,
-                &uniform! { matrix: matrix, u_light: light },
+            &positions,
+            &indices,
+               &program,
+                &uniform! { MVMatrix: matrix, u_light: light },
                 &params,
             )
             .unwrap();
