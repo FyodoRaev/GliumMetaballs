@@ -1,13 +1,13 @@
 
 
-# Current result:
+# Текущие результаты:
 
 ![img](LightPerspectiveResults.gif)
 
-## I made a 3d linspace, implemented marching cubes and triangulation process for the surface of metaballs. Then I added perspective and  estimated normal through fragment shader dfdx dfdy.
+## Я сделал трехмерное линейное пространство, реализовал марширующие кубы и процесс триангуляции для поверхности метаболов. Затем я добавил перспективу и оценил нормали через fragment shader dfdx dfdy.
 
 
-### Right below you can find notes which I did through the development process.
+### Ниже - различные записки по ходу разработки
 
 
 # Notes
