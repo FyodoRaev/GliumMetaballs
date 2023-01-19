@@ -1,5 +1,16 @@
-## Записки
 
+
+# Current result:
+
+![img](LightPerspectiveResults.gif)
+
+## I made a 3d linspace, implemented marching cubes and triangulation process for the surface of metaballs. Then I added perspective and  estimated normal through fragment shader dfdx dfdy.
+
+
+### Right below you can find notes which I did through the development process.
+
+
+# Notes
 - Сейчас я создал linspace в котором есть доступ к кубам(8 вершин с данными координатами) и к точкам ( вроде они мне больше не понадобятся)
 - Я скопировал код для FloatIterator https://stackoverflow.com/questions/47867519/how-to-do-a-for-loop-with-boundary-values-and-step-as-floating-point-values
 - Ура! Заработало! Я пока создал один раз запустил алгоритм и получил вершины, выглядит завораживающе! Почему-то треугольники не замыкают шар в непрерывную фигуру, где-то я напутал с индексами. <img src="intermediateResults.jpg" alt="Picture"/>
@@ -10,8 +21,8 @@
 * [x] (linspace.rs) рассмотреть две вершины которые формируют данное ребро
 * [x] (linspace.rs) найти координаты середины этого ребра, которые как раз и будут координатами вершины треугольника которой должен быть отрисован
 * [x] (linspace.rs) добавить эту вершину
-* [x] Проверить простые случаи, типо сферы
-* [ ] Добавить перспективу 
+* [x] Проверить простые случаи, типо сферы (исправил триангуляцию, создавал двоичную строку не через побитовое или, поэтому и не работало)
+* [x] Добавить перспективу 
 * [x] Добавить движения (пересчитывать вершины на каждом цикле)
   
   ----
