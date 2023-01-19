@@ -11,7 +11,7 @@ fn main() {
     let limit = 50.0;
     let linspace = Linspace::new(1.0, limit);
     let mut metaBallsCenters = vec![(-1.0, 2.0, -1.0), (1.0, 2.0, 1.0)];
-    let metaBallsRads = vec![3.0, 4.0];
+    let metaBallsRads = vec![5.0, 6.0];
 
     let mut stmetaball_vel = (0.7, 0.60, 0.4);
     let mut ndmetaball_vel = (0.5, 0.70, 0.4);
@@ -71,13 +71,13 @@ fn main() {
         },
         ..Default::default()
     };
-    let light = [-1.0, 0.4, 0.9f32];
+    let light = [1.0, 1.0, 2.0f32];
 
      
 
     event_loop.run(move |event, _, control_flow| {
         let next_frame_time =
-            std::time::Instant::now() + std::time::Duration::from_nanos(16_666_667);
+            std::time::Instant::now() + std::time::Duration::from_nanos(50 * 1000000);
         *control_flow = glutin::event_loop::ControlFlow::WaitUntil(next_frame_time);
 
         match event {
