@@ -8,10 +8,10 @@ extern crate glium;
 mod cube;
 mod functions;
 fn main() {
-    let limit = 25.0;
+    let limit = 50.0;
     let linspace = Linspace::new(1.0, limit);
     let mut metaBallsCenters = vec![(-1.0, 2.0, -1.0), (1.0, 2.0, 1.0)];
-    let metaBallsRads = vec![2.0, 3.0];
+    let metaBallsRads = vec![3.0, 4.0];
 
     let mut stmetaball_vel = (0.7, 0.60, 0.4);
     let mut ndmetaball_vel = (0.5, 0.70, 0.4);
@@ -30,12 +30,13 @@ fn main() {
     precision highp float;
     precision highp int;
     
-    uniform mat4 MVMatrix;  //Model View Matrix (no change)
+    uniform mat4 MVMatrix;  //Model View Matrix 
+    uniform mat4 PMatrix;
     in vec3 position;
     out vec3 vPos;
     void main()
     {
-          gl_Position= MVMatrix * vec4(position.xyz,1.0);
+          gl_Position= PMatrix * MVMatrix * vec4(position.xyz,1.0);
           vPos = (MVMatrix * vec4(position.xyz,1.0)).xyz;
     }
     "#;
@@ -99,11 +100,29 @@ fn main() {
         target.clear_color_and_depth((0.0, 0.0, 1.0, 1.0), 1.0);
 
         let matrix = [
-            [0.03, 0.0, 0.0, 0.0],
-            [0.0, 0.03, 0.0, 0.0],
-            [0.0, 0.0, 0.03, 0.0],
-            [0.0, 0.0, 0.0, 1.0f32],
+            [0.04, 0.0, 0.0, 0.0],
+            [0.0, 0.04, 0.0, 0.0],
+            [0.0, 0.0, 0.04, 0.0],
+            [0.0, 0.0, 2.0, 1.0f32]
         ];
+
+        let perspective = {
+            let (width, height) = target.get_dimensions();
+            let aspect_ratio = height as f32 / width as f32;
+
+            let fov: f32 = 3.141592 / 3.0;
+            let zfar = 1024.0;
+            let znear = 0.1;
+
+            let f = 1.0 / (fov / 2.0).tan();
+
+            [
+                [f *   aspect_ratio   ,    0.0,              0.0              ,   0.0],
+                [         0.0         ,     f ,              0.0              ,   0.0],
+                [         0.0         ,    0.0,  (zfar+znear)/(zfar-znear)    ,   1.0],
+                [         0.0         ,    0.0, -(2.0*zfar*znear)/(zfar-znear),   0.0],
+            ]
+        };
 
         move_point(&mut metaBallsCenters[0], &stmetaball_vel);
         move_point(&mut metaBallsCenters[1], &ndmetaball_vel);
@@ -132,7 +151,7 @@ fn main() {
             &positions,
             &indices,
                &program,
-                &uniform! { MVMatrix: matrix, u_light: light },
+                &uniform! { MVMatrix: matrix,PMatrix: perspective, u_light: light },
                 &params,
             )
             .unwrap();
