@@ -7,4 +7,5 @@ edition = "2021"
 
 [dependencies]
 glium = "0.26"
-
+nalgebra-glm = "*"
+rand = "*"

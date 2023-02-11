@@ -7,21 +7,14 @@ pub struct Vertex {
 
 implement_vertex!(Vertex, position);
 
-#[derive(Copy, Clone)]
-pub struct Normal {
-    pub normal: (f32, f32, f32)
-}
-
-implement_vertex!(Normal, normal);
-
 // I will loop this function and get new and new vertices for polygons
-pub fn polygoniseScalarField(linspace: &Linspace, metaBallsCenters: &Vec<(f64, f64, f64)>, metaBallsRads: &Vec<f64>) -> Vec<Vertex> {
+pub fn polygoniseScalarField(linspace: &Linspace) -> Vec<Vertex> {
   // Start marching cubes
-  let pointCoordinates = linspace.getVerticesCoordsIndexes(metaBallsCenters, metaBallsRads, 1.0);
+  let pointCoordinates = linspace.getVerticesCoordsIndexes(0.0);
   let mut verticesIndexes: Vec<Vertex> = Vec::new();
   for point in pointCoordinates {
-
-    verticesIndexes.push(Vertex {position: point,});
+    let coordinates:(f64, f64, f64) = (point.x, point.y, point.z); 
+    verticesIndexes.push(Vertex {position: coordinates,});
   }
   return verticesIndexes;
 }

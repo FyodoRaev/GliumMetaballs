@@ -1,5 +1,5 @@
 use functions::{
-    linspace::Linspace, polygonising::polygoniseScalarField, polygonising::Normal,
+    linspace::Linspace, polygonising::polygoniseScalarField,
     polygonising::Vertex,
 };
 
@@ -8,13 +8,8 @@ extern crate glium;
 mod cube;
 mod functions;
 fn main() {
-    let limit = 50.0;
+    let limit = 20.0;
     let linspace = Linspace::new(1.0, limit);
-    let mut metaBallsCenters = vec![(-1.0, 2.0, -1.0), (1.0, 2.0, 1.0)];
-    let metaBallsRads = vec![5.0, 6.0];
-
-    let mut stmetaball_vel = (0.7, 0.60, 0.4);
-    let mut ndmetaball_vel = (0.5, 0.70, 0.4);
 
     #[allow(unused_imports)]
     use glium::{glutin, Surface};
@@ -72,8 +67,10 @@ fn main() {
         ..Default::default()
     };
     let light = [1.0, 1.0, 2.0f32];
+    
 
-     
+    // Imgui
+    
 
     event_loop.run(move |event, _, control_flow| {
         let next_frame_time =
@@ -124,27 +121,9 @@ fn main() {
             ]
         };
 
-        move_point(&mut metaBallsCenters[0], &stmetaball_vel);
-        move_point(&mut metaBallsCenters[1], &ndmetaball_vel);
+      
 
-        repulsion(
-            &metaBallsCenters[0],
-            &mut stmetaball_vel,
-            &metaBallsRads[0],
-            limit / 2.0,
-            limit / 2.0,
-            limit / 2.0,
-        );
-        repulsion(
-            &metaBallsCenters[1],
-            &mut ndmetaball_vel,
-            &metaBallsRads[1],
-            limit / 2.0,
-            limit / 2.0,
-            limit / 2.0,
-        );
-
-        let mut shape: Vec<Vertex> = polygoniseScalarField(&linspace, &metaBallsCenters, &metaBallsRads);
+        let mut shape: Vec<Vertex> = polygoniseScalarField(&linspace);
         let positions = glium::VertexBuffer::new(&display, &shape).unwrap();
         let indices = glium::index::NoIndices(glium::index::PrimitiveType::TrianglesList);
         target.draw(
@@ -157,40 +136,4 @@ fn main() {
             .unwrap();
         target.finish().unwrap();
     });
-}
-
-// Plotting
-
-pub fn move_point(coordinate: &mut (f64, f64, f64), velocity: &(f64, f64, f64)) {
-    coordinate.0 += velocity.0;
-    coordinate.1 += velocity.1;
-    coordinate.2 += velocity.2;
-}
-
-pub fn repulsion(
-    coordinate: &(f64, f64, f64),
-    velocity: &mut (f64, f64, f64),
-    radius: &f64,
-    x_limit: f64,
-    y_limit: f64,
-    z_limit: f64,
-) {
-    let x = coordinate.0;
-    let y = coordinate.1;
-    let z = coordinate.2;
-    if x > x_limit - radius {
-        velocity.0 = -velocity.0;
-    } else if x < -x_limit + radius {
-        velocity.0 = -velocity.0;
-    }
-    if y > y_limit - radius {
-        velocity.1 = -velocity.1;
-    } else if y < -y_limit + radius {
-        velocity.1 = -velocity.1;
-    }
-    if z > z_limit - radius {
-        velocity.2 = -velocity.2;
-    } else if z < -z_limit + radius {
-        velocity.2 = -velocity.2;
-    }
 }
