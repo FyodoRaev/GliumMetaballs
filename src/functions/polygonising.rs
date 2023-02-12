@@ -8,9 +8,9 @@ pub struct Vertex {
 implement_vertex!(Vertex, position);
 
 // I will loop this function and get new and new vertices for polygons
-pub fn polygoniseScalarField(linspace: &Linspace) -> Vec<Vertex> {
+pub fn polygoniseScalarField(linspace: &Linspace, time: f64) -> Vec<Vertex> {
   // Start marching cubes
-  let pointCoordinates = linspace.getVerticesCoordsIndexes(0.0);
+  let pointCoordinates = linspace.getVerticesCoordsIndexes(0.225, time);
   let mut verticesIndexes: Vec<Vertex> = Vec::new();
   for point in pointCoordinates {
     let coordinates:(f64, f64, f64) = (point.x, point.y, point.z); 

@@ -3,13 +3,15 @@ use functions::{
     polygonising::Vertex,
 };
 
+use rand::{Rng};
+
 #[macro_use]
 extern crate glium;
 mod cube;
 mod functions;
 fn main() {
     let limit = 20.0;
-    let linspace = Linspace::new(1.0, limit);
+    let linspace = Linspace::new(0.5, limit);
 
     #[allow(unused_imports)]
     use glium::{glutin, Surface};
@@ -26,12 +28,13 @@ fn main() {
     precision highp int;
     
     uniform mat4 MVMatrix;  //Model View Matrix 
+    uniform mat4 view;
     uniform mat4 PMatrix;
     in vec3 position;
     out vec3 vPos;
     void main()
     {
-          gl_Position= PMatrix * MVMatrix * vec4(position.xyz,1.0);
+          gl_Position= PMatrix * view * MVMatrix * vec4(position.xyz,1.0);
           vPos = (MVMatrix * vec4(position.xyz,1.0)).xyz;
     }
     "#;
@@ -50,8 +53,8 @@ fn main() {
             vec3 fdy = vec3(dFdy(vPos.x),dFdy(vPos.y),dFdy(vPos.z));
             vec3 normal = normalize(cross(fdx,fdy));
             float brightness = dot(normalize(normal), normalize(u_light));
-            vec3 dark_color = vec3(0.6, 0.0, 0.0);
-            vec3 regular_color = vec3(1.0, 0.0, 0.0);
+            vec3 dark_color = vec3(0.156, 0.29, 0.38);
+            vec3 regular_color = vec3(0.26, 0.40, 0.55);
             color = vec4(mix(dark_color, regular_color, brightness), 1.0);
         } "#;
 
@@ -67,14 +70,14 @@ fn main() {
         ..Default::default()
     };
     let light = [1.0, 1.0, 2.0f32];
-    
+    let view = view_matrix(&[2.0, -0.5, 1.0], &[-2.0, 1.0, 1.0], &[0.0, 1.0, 0.0]);
 
-    // Imgui
-    
+    let mut time: f64 = 0.0;
+    let mut rng = rand::thread_rng();
 
     event_loop.run(move |event, _, control_flow| {
         let next_frame_time =
-            std::time::Instant::now() + std::time::Duration::from_nanos(50 * 1000000);
+            std::time::Instant::now() + std::time::Duration::from_nanos(100 * 100000);
         *control_flow = glutin::event_loop::ControlFlow::WaitUntil(next_frame_time);
 
         match event {
@@ -94,12 +97,12 @@ fn main() {
         }
 
         let mut target = display.draw();
-        target.clear_color_and_depth((0.0, 0.0, 1.0, 1.0), 1.0);
+        target.clear_color_and_depth((0.95, 0.90, 0.85, 1.0), 1.0);
 
         let matrix = [
-            [0.04, 0.0, 0.0, 0.0],
-            [0.0, 0.04, 0.0, 0.0],
-            [0.0, 0.0, 0.04, 0.0],
+            [0.05, 0.0, 0.0, 0.0],
+            [0.0, 0.05, 0.0, 0.0],
+            [0.0, 0.0, 0.05, 0.0],
             [0.0, 0.0, 2.0, 1.0f32]
         ];
 
@@ -122,18 +125,54 @@ fn main() {
         };
 
       
-
-        let mut shape: Vec<Vertex> = polygoniseScalarField(&linspace);
+        time+=  0.5 * rng.gen::<f64>();
+        let mut shape: Vec<Vertex> = polygoniseScalarField(&linspace, time);
         let positions = glium::VertexBuffer::new(&display, &shape).unwrap();
         let indices = glium::index::NoIndices(glium::index::PrimitiveType::TrianglesList);
         target.draw(
             &positions,
             &indices,
                &program,
-                &uniform! { MVMatrix: matrix,PMatrix: perspective, u_light: light },
+                &uniform! { MVMatrix: matrix,PMatrix: perspective, u_light: light, view: view},
                 &params,
             )
             .unwrap();
         target.finish().unwrap();
     });
+}
+
+
+
+fn view_matrix(position: &[f32; 3], direction: &[f32; 3], up: &[f32; 3]) -> [[f32; 4]; 4] {
+    let f = {
+        let f = direction;
+        let len = f[0] * f[0] + f[1] * f[1] + f[2] * f[2];
+        let len = len.sqrt();
+        [f[0] / len, f[1] / len, f[2] / len]
+    };
+
+    let s = [up[1] * f[2] - up[2] * f[1],
+             up[2] * f[0] - up[0] * f[2],
+             up[0] * f[1] - up[1] * f[0]];
+
+    let s_norm = {
+        let len = s[0] * s[0] + s[1] * s[1] + s[2] * s[2];
+        let len = len.sqrt();
+        [s[0] / len, s[1] / len, s[2] / len]
+    };
+
+    let u = [f[1] * s_norm[2] - f[2] * s_norm[1],
+             f[2] * s_norm[0] - f[0] * s_norm[2],
+             f[0] * s_norm[1] - f[1] * s_norm[0]];
+
+    let p = [-position[0] * s_norm[0] - position[1] * s_norm[1] - position[2] * s_norm[2],
+             -position[0] * u[0] - position[1] * u[1] - position[2] * u[2],
+             -position[0] * f[0] - position[1] * f[1] - position[2] * f[2]];
+
+    [
+        [s_norm[0], u[0], f[0], 0.0],
+        [s_norm[1], u[1], f[1], 0.0],
+        [s_norm[2], u[2], f[2], 0.0],
+        [p[0], p[1], p[2], 1.0],
+    ]
 }
