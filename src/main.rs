@@ -70,14 +70,14 @@ fn main() {
         ..Default::default()
     };
     let light = [1.0, 1.0, 2.0f32];
-    let view = view_matrix(&[2.0, -0.5, 1.0], &[-2.0, 1.0, 1.0], &[0.0, 1.0, 0.0]);
+    let view = view_matrix(&[1.0, 0.0, 1.0], &[-0.8, 0.0, 1.0], &[0.0, 0.5, 0.0]);
 
     let mut time: f64 = 0.0;
     let mut rng = rand::thread_rng();
 
     event_loop.run(move |event, _, control_flow| {
         let next_frame_time =
-            std::time::Instant::now() + std::time::Duration::from_nanos(100 * 100000);
+            std::time::Instant::now() + std::time::Duration::from_nanos(100000);
         *control_flow = glutin::event_loop::ControlFlow::WaitUntil(next_frame_time);
 
         match event {
