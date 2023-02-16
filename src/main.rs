@@ -2,17 +2,39 @@ use functions::{
     linspace::Linspace, polygonising::polygoniseScalarField,
     polygonising::Vertex,
 };
-
 use rand::{Rng};
+use std::thread;
+use std::sync::mpsc;
+use std::time::Duration;
+use fltk::{prelude::*, app::App, window::Window, valuator, button};
+
 
 #[macro_use]
 extern crate glium;
 mod cube;
 mod functions;
 fn main() {
-    let limit = 20.0;
-    let linspace = Linspace::new(0.5, limit);
+    let (tx, rx) = mpsc::channel();
+    
 
+    thread::spawn(move || {
+    let a = App::default();
+    let mut wind = Window::new(100, 100, 400, 300, "My Window");
+
+    let mut slider1 = valuator::HorNiceSlider::default().with_size(400, 20).center_of_parent();
+    slider1.set_minimum(-3.14);
+    slider1.set_maximum(3.14);
+    slider1.set_step(0.1, 1); // increment by 1.0 at each 1 step
+    slider1.set_value(0.); // start in the middle
+    slider1.set_callback(move |s| {
+        tx.send(s.value() as f32).unwrap();
+    });
+    wind.end();
+    wind.show();
+    a.run().unwrap();
+    thread::sleep(Duration::from_millis(1));});
+    let limit = 20.0;
+    let linspace = Linspace::new(1.0, limit);
     #[allow(unused_imports)]
     use glium::{glutin, Surface};
 
@@ -69,15 +91,15 @@ fn main() {
         },
         ..Default::default()
     };
-    let light = [1.0, 1.0, 2.0f32];
-    let view = view_matrix(&[1.0, 0.0, 1.0], &[-0.8, 0.0, 1.0], &[0.0, 0.5, 0.0]);
+    let light = [-1.0, -1.0, -2.0f32];
+    
 
     let mut time: f64 = 0.0;
     let mut rng = rand::thread_rng();
 
     event_loop.run(move |event, _, control_flow| {
         let next_frame_time =
-            std::time::Instant::now() + std::time::Duration::from_nanos(100000);
+            std::time::Instant::now() + std::time::Duration::from_nanos(10000);
         *control_flow = glutin::event_loop::ControlFlow::WaitUntil(next_frame_time);
 
         match event {
@@ -98,7 +120,10 @@ fn main() {
 
         let mut target = display.draw();
         target.clear_color_and_depth((0.95, 0.90, 0.85, 1.0), 1.0);
-
+        let alpha = rx.recv().unwrap();
+        println!("The angle is: {}", alpha);
+        let view = view_matrix(&[alpha.sin(), 0.0, alpha.cos() + 2.5], &[-alpha.sin(), 0.0, - (alpha.cos()+2.5)/3.5], &[0.0, 0.5, 0.0]);
+        
         let matrix = [
             [0.05, 0.0, 0.0, 0.0],
             [0.0, 0.05, 0.0, 0.0],
@@ -176,3 +201,5 @@ fn view_matrix(position: &[f32; 3], direction: &[f32; 3], up: &[f32; 3]) -> [[f3
         [p[0], p[1], p[2], 1.0],
     ]
 }
+
+
