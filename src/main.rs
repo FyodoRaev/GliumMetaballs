@@ -2,12 +2,36 @@ use functions::{
     linspace::Linspace, polygonising::polygoniseScalarField, polygonising::Normal,
     polygonising::Vertex,
 };
+use std::thread;
+use std::sync::mpsc;
+use std::time::Duration;
+use fltk::{prelude::*, app::App, window::Window, valuator, button};
 
 #[macro_use]
 extern crate glium;
 mod cube;
 mod functions;
 fn main() {
+    let (tx, rx) = mpsc::channel();
+    
+
+    thread::spawn(move || {
+    let a = App::default();
+    let mut wind = Window::new(100, 100, 400, 300, "My Window");
+
+    let mut slider1 = valuator::HorNiceSlider::default().with_size(400, 20).center_of_parent();
+    slider1.set_minimum(-3.14);
+    slider1.set_maximum(3.14);
+    slider1.set_step(0.1, 1); // increment by 1.0 at each 1 step
+    slider1.set_value(0.); // start in the middle
+    slider1.set_callback(move |s| {
+        tx.send(s.value() as f32).unwrap();
+    });
+    wind.end();
+    wind.show();
+    a.run().unwrap();
+    thread::sleep(Duration::from_millis(1));});
+
     let limit = 50.0;
     let linspace = Linspace::new(1.0, limit);
     let mut metaBallsCenters = vec![(-1.0, 2.0, -1.0), (1.0, 2.0, 1.0)];
@@ -32,11 +56,12 @@ fn main() {
     
     uniform mat4 MVMatrix;  //Model View Matrix 
     uniform mat4 PMatrix;
+    uniform mat4 view;
     in vec3 position;
     out vec3 vPos;
     void main()
     {
-          gl_Position= PMatrix * MVMatrix * vec4(position.xyz,1.0);
+          gl_Position= PMatrix * view * MVMatrix * vec4(position.xyz,1.0);
           vPos = (MVMatrix * vec4(position.xyz,1.0)).xyz;
     }
     "#;
@@ -99,6 +124,10 @@ fn main() {
         let mut target = display.draw();
         target.clear_color_and_depth((0.0, 0.0, 1.0, 1.0), 1.0);
 
+        let alpha = rx.recv().unwrap();
+        println!("The angle is: {}", alpha);
+        let view = view_matrix(&[alpha.sin(), 0.0, alpha.cos() - 1.0], &[alpha.sin(), 0.0, (alpha.cos()+2.5)/3.5], &[0.0, 0.5, 0.0]);
+        
         let matrix = [
             [0.04, 0.0, 0.0, 0.0],
             [0.0, 0.04, 0.0, 0.0],
@@ -151,7 +180,7 @@ fn main() {
             &positions,
             &indices,
                &program,
-                &uniform! { MVMatrix: matrix,PMatrix: perspective, u_light: light },
+                &uniform! { MVMatrix: matrix,PMatrix: perspective, u_light: light, view: view },
                 &params,
             )
             .unwrap();
@@ -193,4 +222,39 @@ pub fn repulsion(
     } else if z < -z_limit + radius {
         velocity.2 = -velocity.2;
     }
+}
+
+
+fn view_matrix(position: &[f32; 3], direction: &[f32; 3], up: &[f32; 3]) -> [[f32; 4]; 4] {
+    let f = {
+        let f = direction;
+        let len = f[0] * f[0] + f[1] * f[1] + f[2] * f[2];
+        let len = len.sqrt();
+        [f[0] / len, f[1] / len, f[2] / len]
+    };
+
+    let s = [up[1] * f[2] - up[2] * f[1],
+             up[2] * f[0] - up[0] * f[2],
+             up[0] * f[1] - up[1] * f[0]];
+
+    let s_norm = {
+        let len = s[0] * s[0] + s[1] * s[1] + s[2] * s[2];
+        let len = len.sqrt();
+        [s[0] / len, s[1] / len, s[2] / len]
+    };
+
+    let u = [f[1] * s_norm[2] - f[2] * s_norm[1],
+             f[2] * s_norm[0] - f[0] * s_norm[2],
+             f[0] * s_norm[1] - f[1] * s_norm[0]];
+
+    let p = [-position[0] * s_norm[0] - position[1] * s_norm[1] - position[2] * s_norm[2],
+             -position[0] * u[0] - position[1] * u[1] - position[2] * u[2],
+             -position[0] * f[0] - position[1] * f[1] - position[2] * f[2]];
+
+    [
+        [s_norm[0], u[0], f[0], 0.0],
+        [s_norm[1], u[1], f[1], 0.0],
+        [s_norm[2], u[2], f[2], 0.0],
+        [p[0], p[1], p[2], 1.0],
+    ]
 }
