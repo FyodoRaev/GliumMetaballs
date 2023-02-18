@@ -97,8 +97,7 @@ fn main() {
         ..Default::default()
     };
     let light = [1.0, 1.0, 2.0f32];
-
-     
+    let mut alpha: f32 = 0.0;
 
     event_loop.run(move |event, _, control_flow| {
         let next_frame_time =
@@ -123,8 +122,10 @@ fn main() {
 
         let mut target = display.draw();
         target.clear_color_and_depth((0.0, 0.0, 1.0, 1.0), 1.0);
-
-        let alpha = rx.recv().unwrap();
+        if rx.try_recv().is_err() != true {
+            alpha = rx.recv().unwrap();
+        }
+        
         println!("The angle is: {}", alpha);
         let view = view_matrix(&[alpha.sin(), 0.0, alpha.cos() - 1.0], &[alpha.sin(), 0.0, (alpha.cos()+2.5)/3.5], &[0.0, 0.5, 0.0]);
         
