@@ -28,13 +28,14 @@ fn main() {
     slider1.set_value(0.); // start in the middle
     slider1.set_callback(move |s| {
         tx.send(s.value() as f32).unwrap();
+        thread::sleep(Duration::from_millis(1));
     });
     wind.end();
     wind.show();
     a.run().unwrap();
-    thread::sleep(Duration::from_millis(1));});
+    });
     let limit = 20.0;
-    let linspace = Linspace::new(1.0, limit);
+    let linspace = Linspace::new(0.3, limit);
     #[allow(unused_imports)]
     use glium::{glutin, Surface};
 
@@ -92,8 +93,7 @@ fn main() {
         ..Default::default()
     };
     let light = [-1.0, -1.0, -2.0f32];
-    
-
+    let mut alpha: f32 = 0.0;
     let mut time: f64 = 0.0;
     let mut rng = rand::thread_rng();
 
@@ -120,7 +120,10 @@ fn main() {
 
         let mut target = display.draw();
         target.clear_color_and_depth((0.95, 0.90, 0.85, 1.0), 1.0);
-        let alpha = rx.recv().unwrap();
+        
+        if rx.try_recv().is_err() != true {
+            alpha = rx.recv().unwrap();
+        }
         println!("The angle is: {}", alpha);
         let view = view_matrix(&[alpha.sin(), 0.0, alpha.cos() + 2.5], &[-alpha.sin(), 0.0, - (alpha.cos()+2.5)/3.5], &[0.0, 0.5, 0.0]);
         
